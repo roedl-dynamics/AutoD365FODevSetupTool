@@ -1,6 +1,6 @@
 # AutoD365FODevSetupTool
 
-Change the parameters of D365 Configuration-XML ("C:\Users\\<USER>\Documents\Visual Studio Dynamics 365\DynamicsDevConfig.xml")
+Change the parameters of D365 Configuration-XML ("C:\Users\<USER>\Documents\Visual Studio Dynamics 365\DynamicsDevConfig.xml")
 
 
 # How to use
