@@ -5,10 +5,13 @@ Change the parameters of D365 Configuration-XML ("C:\Users\<USER>\Documents\Visu
 
 # How to use
 1. Start AutoD365FODevSetupTool.exe.
+
 2. Change the text parameter or check the box.
 3. Button OK saves the changes.
 4. Button Cancel closes the tool (without saving).
 
+
+![image](https://github.com/roedl-dynamics/AutoD365FODevSetupTool/blob/main/DevSetupGUI.png)
 
 # Edit the script
 
