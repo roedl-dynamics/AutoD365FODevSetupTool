@@ -4,19 +4,18 @@
  Author:         Andrej Graf
 
  Script Function:
-	02.08.2023 - Start DEV
+	02.08.2023  - Start DEV
 				- path to file
 				- 4 Parameter wurden hinzugefügt
-	03.08.2023 - Plan erstellt
+	03.08.2023  - Plan erstellt
 				- Button Cancel
 				- Checkbox on/off (manuell)
 				- File Open, Error, wenn es kein File gibt
 				- String wurde mit Array geändert
 				- func GetStringFromXML - nimmt die Info von XML zwischen > und < und fügt das in Input in GUI hinzu (abhängig von linenumber)
-				- func WriteStringToXML - Ändert XML abhängig vom Input des Users abhängig von linienumber und $input(linienumber). Ändert XML abhängig vom Input des Users
-				- die andere wurden hinzufügen (Oberfläche)
-	04.08.2023 - Andere (mit Text) wurden einordnen (mithilfe von func oldstring und newstring) - - - 2,5 Stunden
-				- func oldStringTF: (function nimmt die Info von XML zwischen > und < (true oder false) und macht Checkbox on/off)
+				- func WriteStringToXML - ändert XML abhängig vom Input des Users (abhängig von linenumber)
+				- die andere Parameter wurden hinzufügen
+	04.08.2023 	- func GetStringFromXMLForCheckbox - nimmt die Info von XML zwischen > und < (true oder false) und macht Checkbox on/off
 				- func newstringTF, ändert XML abhängig vom Checkbox (on/off in GUI)
 				- clear code and comments
 				- bug fix - - - 3 Stunden
