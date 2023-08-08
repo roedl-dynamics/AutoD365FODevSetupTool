@@ -6,24 +6,24 @@
  Script Function:
 	02.08.2023  - Start DEV
 				- path to file
-				- 4 Parameter wurden hinzugefügt
-	03.08.2023  - Plan erstellt
+				- 4 Parameter added
+	03.08.2023  - To Do list
 				- Button Cancel
-				- Checkbox on/off (manuell)
-				- File Open, Error, wenn es kein File gibt
-				- String wurde mit Array geändert
-				- func GetStringFromXML - nimmt die Info von XML zwischen > und < und fügt das in Input in GUI hinzu (abhängig von linenumber)
-				- func WriteStringToXML - ändert XML abhängig vom Input des Users (abhängig von linenumber)
-				- die andere Parameter wurden hinzufügen
-	04.08.2023 	- func GetStringFromXMLForCheckbox - nimmt die Info von XML zwischen > und < (true oder false) und macht Checkbox on/off
-				- func newstringTF, ändert XML abhängig vom Checkbox (on/off in GUI)
+				- Checkbox on/off
+				- File Open, error, if there is no file
+				- Change strings by arrays
+				- function GetStringFromXML - get info from XML between > and <  and set in input in GUI (depend on linenumber)
+				- function WriteStringToXML - write input from user in XML (depend on linenumber)
+				- the rest of parameters added
+	04.08.2023 	- function GetStringFromXMLForCheckbox - get info from XML between > and <  (true or false) and check the box (on or off) (depend on linenumber)
+				- function WriteStringToXMLForCheckbox - write in XML true or false, if checkbox is on or off (depend on linenumber)
 				- clear code and comments
-				- bug fix - - - 3 Stunden
-				- variable wurden richtig formatiert
-				- for loop musste suchen variable in XML, funtionierte nicht korrekt
-				- while loop funktioniert, muss verbessert sein
-	07.08.2023 - bugfix (\ - wurden entfernt in XML) - - - 3 Stunde
-				- neue Function GetLineNumber
+				- format of variables
+	07.08.2023  - bugfix (special characters (\) were deleted in XML)
+				- function GetLineNumber - search parameter between < and >, return linenumber
+				- GetLineNumber was added in all of 4 functions. Now functions aren´t depending on linenumber
+				- constants for each input and checkbox with a name of parameter (between < and >)
+	08.08.2023	- add if statement with error message in GetLineNumber
 				- clear code and comments
 
 
@@ -44,10 +44,9 @@ Opt("MustDeclareVars", 1)
 
 
 
-;~ Local $FilePath = @UserProfileDir & "\Documents\Visual Studio Dynamics 365\DynamicsDevConfig.xml" ; TODO allgemein
-Local $FilePath = @UserProfileDir & "\OneDrive - Roedl Dynamics GmbH\Documents\Visual Studio Dynamics 365\DynamicsDevConfig.xml" ; ich habe OneDrive eingerichtet, so liegen jetzt meine Documents in diesem Folder
+Local $FilePath = @MyDocumentsDir & "\Visual Studio Dynamics 365\DynamicsDevConfig.xml"
 Local $FileOpen = FileOpen($FilePath)
-If $FileOpen = -1 Then ; Prüfen, ob File existiert, wenn nicht, dann Error
+If $FileOpen = -1 Then ; check, if the file exists. If not, then error
 	MsgBox(16, "Error", "Error, there is no file" & @CRLF & $FilePath)
 	Exit
 EndIf
@@ -56,8 +55,9 @@ FileClose($FileOpen)
 
 
 
-;GUI
-#Region ; Const für strings <>
+;GUI. For each input and checkbox there are the constants with the name of parameter. Constants are used in each function.
+;Variables of checkboxes are named with "CB_" at the beginning. For input there are two variables: "Label_..." - the name of input, "Input_..." - box with input.
+#Region
 Local $Form_D365_FO_DEV_Setup = GUICreate("Rödl Dynamics GmbH - D365 FO DEV Setup", 615, 692, 187, 140)
 
 Const $AddProjectToExistingSolution_Const = "AddProjectToExistingSolution"
@@ -169,10 +169,11 @@ WEnd
 
 
 
-Func GetLineNumber($SearchText) ;  man muss den Text zwischen < und > hinzufügen, am Ende bekommt man die Nummer von Linien, wo das steht
+; Function takes a name of parameter (between < and >), searches that in XML, returns the linenumber of parameter. If there is no parameter with the name of constant, then error and exit
+Func GetLineNumber($SearchText)
 	Local $FileStrings = FileReadToArray($FilePath)
 	Local $i = 0
-	Global $linenumber
+	Local $linenumber
 	While $i < UBound($FileStrings)
 		If StringInStr($FileStrings[$i], "<" & $SearchText & ">") Then
 			$linenumber = $i + 1
@@ -180,68 +181,77 @@ Func GetLineNumber($SearchText) ;  man muss den Text zwischen < und > hinzufüge
 		EndIf
 		$i += 1
 	WEnd
-	ConsoleWrite($linenumber & @CRLF)
+
+	If $i = UBound($FileStrings) Then
+		MsgBox(16, "Error", "The parameter """ & $SearchText & """ is not found")
+		Exit
+	EndIf
+;~ 	ConsoleWrite($linenumber & @CRLF)
 	Return $linenumber
 EndFunc
 
 
 
 
-Func GetStringFromXML($SearchText) ; nimmt info von XML, was steht zwischen > und <, und fügt in GUI hinzu
-	GetLineNumber($SearchText)
+; Function takes info from XML, what is between > and < and adds it in GUI. It depends on name of parameter (between < and >, by function GetLineNumber)
+Func GetStringFromXML($SearchText)
+	Local $linenumber = GetLineNumber($SearchText)
 	Local $FileStrings = FileReadToArray($FilePath)
 	Local $result = StringRegExpReplace($FileStrings[$linenumber - 1], ".*>(.*?)<.*", "$1")
-	ConsoleWrite($result & @CRLF)
+;~ 	ConsoleWrite($result & @CRLF)
 	Return $result
 EndFunc
 
 
 
 
-Func GetStringFromXMLForCheckbox($SearchText) ; nimmt info von XML, macht Checkbox on/off, wenn in XML true/false
-	GetLineNumber($SearchText)
+; Function takes info from XML, what is between > and < (true or false) and check the box in GUI on or off. It depends on name of parameter (between < and >, by function GetLineNumber)
+; The function is only for checkboxes. If there is not true and not false between > and <, then error
+Func GetStringFromXMLForCheckbox($SearchText)
+	Local $linenumber = GetLineNumber($SearchText)
 	Local $FileStrings = FileReadToArray($FilePath)
 	Local $result = StringRegExpReplace($FileStrings[$linenumber - 1], ".*>(.*?)<.*", "$1")
-	ConsoleWrite($result & @CRLF)
+;~ 	ConsoleWrite($result & @CRLF)
 	If $result = "true" Then
 		GUICtrlSetState(-1, $GUI_CHECKED)
 	ElseIf $result = "false" Then
 		GUICtrlSetState(-1, Not $GUI_CHECKED)
 	Else
-		MsgBox(16, "Error", "Please, proof XML-File, the string number " & $linenumber & " should contain only true or false")
+		MsgBox(16, "Error", "Please, proof XML-File, the string number """ & $linenumber & """ should contain only true or false")
 	EndIf
 EndFunc
 
 
 
 
-Func WriteStringToXML($SearchText, $Input) ; schreibt Input von User in XML
-	GetLineNumber($SearchText)
+;Function takes the input from user or the info from input in GUI, if user didn´t change the inputbox, then escape the special characters, then adds the input in XML between > and < and saves the file
+;It depends on name of parameter (between < and >, by function GetLineNumber)
+Func WriteStringToXML($SearchText, $Input)
+	Local $linenumber = GetLineNumber($SearchText)
 	Local $FileStrings = FileReadToArray($FilePath)
-	Local $InputSpecChar
-	$InputSpecChar = GUICtrlRead($Input)
-	$InputSpecChar = StringRegExpReplace($InputSpecChar, "[.*?^${}()|[\]\\]", "\\$0") ; ohne das wurden spec character entfernt
+	Local $InputSpecChar = GUICtrlRead($Input)
+	$InputSpecChar = StringRegExpReplace($InputSpecChar, "[.*?^${}()|[\]\\]", "\\$0")
 	$FileStrings[$linenumber - 1] = StringRegExpReplace($FileStrings[$linenumber - 1], "(?<=>).*?(?=<)" , $InputSpecChar)
- 	_FileWriteFromArray($FilePath, $FileStrings) ;changes file
-	ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
+ 	_FileWriteFromArray($FilePath, $FileStrings)
+;~ 	ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
 EndFunc
 
 
 
 
-Func WriteStringToXMLForCheckbox($SearchText, $Checkbox) ; schreibt true/false in XML, wenn Checkbox von User on/off gestellt wurde
-	GetLineNumber($SearchText)
+;Function takes the poistion of checkbox (on/off). User could it change, or not change. If checkbox is on, than function writes "true" in XML between > and < and changes the file. If checkbox is off, than write "false".
+;It depends on name of parameter (between < and >, by function GetLineNumber)
+Func WriteStringToXMLForCheckbox($SearchText, $Checkbox)
+	Local $linenumber = GetLineNumber($SearchText)
 	Local $FileStrings = FileReadToArray($FilePath)
 	Local $statusOfCheckbox = GUICtrlRead($Checkbox)
 	If $statusOfCheckbox = 1 Then
 		$FileStrings[$linenumber - 1] = StringRegExpReplace($FileStrings[$linenumber - 1], "(?<=>).*(?=<)" , "true")
-		ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
- 		_FileWriteFromArray($FilePath, $FileStrings) ;changes file
+;~ 		ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
+ 		_FileWriteFromArray($FilePath, $FileStrings)
 	ElseIf $statusOfCheckbox = 4 Then
 		$FileStrings[$linenumber - 1] = StringRegExpReplace($FileStrings[$linenumber - 1], "(?<=>).*(?=<)" , "false")
-		ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
- 		_FileWriteFromArray($FilePath, $FileStrings) ;changes file
-	Else
-		MsgBox(16, "Error", "Unknown error")
+;~ 		ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
+ 		_FileWriteFromArray($FilePath, $FileStrings)
 	EndIf
 EndFunc
