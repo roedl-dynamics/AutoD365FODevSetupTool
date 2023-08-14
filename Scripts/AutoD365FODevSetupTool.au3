@@ -7,8 +7,7 @@
 	02.08.2023  - Start DEV
 				- path to file
 				- 4 Parameter added
-	03.08.2023  - To Do list
-				- Button Cancel
+	03.08.2023  - Button Cancel
 				- Checkbox on/off
 				- File Open, error, if there is no file
 				- Change strings by arrays
@@ -23,14 +22,16 @@
 				- function _GetLineNumber - search parameter between < and >, return linenumber
 				- _GetLineNumber was added in all of 4 functions. Now functions aren´t depending on linenumber
 				- constants for each input and checkbox with a name of parameter (between < and >)
-	08.08.2023	- add if statement with error message in _GetLineNumber
+	08.08.2023	- if statement with error message in _GetLineNumber added
 				- clear code and comments
-
 				- Button Ok safe file and now close
 				- add icon
 				- add _ for my functions
 				- GUICtrlSetState in GetStringFromXMLForCheckbox is now with name of checkbox, earlier war with "-1" (added second parameter in this function)
 				- func _WriteStringToXMLForCombo
+	09.08.2023  - button for file open dialog
+	14.08.2023  - function _OpenFileDialog
+				- function _GetFoldersForCombo
 
 
 
@@ -81,6 +82,7 @@ Local $Input_AosWebsiteName = GUICtrlCreateInput(_GetStringFromXML($AosWebsiteNa
 Const $ApplicationHostConfigFile_Const = "ApplicationHostConfigFile"
 Local $Label_ApplicationHostConfigFile = GUICtrlCreateLabel($ApplicationHostConfigFile_Const, 16, 74, 130, 17)
 Local $Input_ApplicationHostConfigFile = GUICtrlCreateInput(_GetStringFromXML($ApplicationHostConfigFile_Const), 16, 90, 553, 21)
+Local $ButtonFileOpenDialog_ApplicationHostConfigFile = GUICtrlCreateButton("...", 570, 90, 21, 21)
 
 Const $BuildModulesInParallel_Const = "BuildModulesInParallel"
 Local $CB_BuildModulesInParallel = GUICtrlCreateCheckbox($BuildModulesInParallel_Const, 16, 116, 209, 17)
@@ -101,12 +103,8 @@ Local $Input_DatabaseServer = GUICtrlCreateInput(_GetStringFromXML($DatabaseServ
 Const $DefaultModelForNewProjects_Const = "DefaultModelForNewProjects"
 Local $Label_DefaultModelForNewProjects = GUICtrlCreateLabel($DefaultModelForNewProjects_Const, 16, 248, 154, 17)
 Local $Combo_DefaultModelForNewProjects = GUICtrlCreateCombo(_GetStringFromXML($DefaultModelForNewProjects_Const), 16, 264, 553, 21)
-;~ Local $Path_DefaultModelForNewProjects = "K:\AosService\PackagesLocalDirectory"; path to folder
-Local $Path_DefaultModelForNewProjects = @MyDocumentsDir & "\test\" ; path to folder
-Local $Array_DefaultModelForNewProjects = _FileListToArray($Path_DefaultModelForNewProjects, Default, $FLTA_FOLDERS) ; the foldernames from folder are to combo
-For $i = 1 To $Array_DefaultModelForNewProjects[0]
-	GUICtrlSetData($Combo_DefaultModelForNewProjects, $Array_DefaultModelForNewProjects[$i])
-Next
+;~ _GetFoldersForCombo(@MyDocumentsDir & "\test\", $Combo_DefaultModelForNewProjects) ; for test
+_GetFoldersForCombo("K:\AosService\PackagesLocalDirectory", $Combo_DefaultModelForNewProjects)
 
 Const $DefaultWebBrowser_Const = "DefaultWebBrowser"
 Local $Label_DefaultWebBrowser = GUICtrlCreateLabel($DefaultWebBrowser_Const, 16, 290, 111, 17)
@@ -158,6 +156,10 @@ While 1
 		Case $GUI_EVENT_CLOSE
 			Exit
 
+		Case $ButtonFileOpenDialog_ApplicationHostConfigFile
+			_OpenFileDialog($Input_ApplicationHostConfigFile)
+
+
 		Case $ButtonOk
 			_WriteStringToXMLForCheckbox($AddProjectToExistingSolution_Const, $CB_AddProjectToExistingSolution)
 			_WriteStringToXML($AosWebsiteName_Const, $Input_AosWebsiteName)
@@ -182,6 +184,42 @@ While 1
 			Exit
 	EndSwitch
 WEnd
+
+
+
+
+;function gets the name of folders from path, and adds in combo. If there is no folder, than error
+Func _GetFoldersForCombo ($Path, $Combo)
+	Local $ArrayForCombo = _FileListToArray($Path, Default, $FLTA_FOLDERS) ; the foldernames from folder are to combo
+;~ 	ConsoleWrite($ArrayForCombo & @CRLF)
+	If @error Then ; check, if the folder exists. If not, then error
+		MsgBox(16, "Error", "Folder" & @CRLF & $Path & @CRLF & "should contain other folders")
+	Else
+
+	For $i = 1 To $ArrayForCombo[0]
+		GUICtrlSetData($Combo, $ArrayForCombo[$i])
+	Next
+	EndIf
+EndFunc
+
+
+
+
+;function opens the folder, user can choose the file, the path is written in input. In open dialog is the last choosen folder. If user didn´t choose the file, than error
+Func _OpenFileDialog($Input)
+	Local $Path = GUICtrlRead($Input)
+	StringLeft($Path, StringInStr($Path, "\", 0, -1) - 1)
+	ConsoleWrite($Path & @CRLF)
+	Local Const $message = "Choose the file"
+	Local $FileOpenDialog = FileOpenDialog($message, $Path, "Configuration file (*.config)|All (*.*)")
+	If @error Then
+		MsgBox($MB_SYSTEMMODAL, "", "No file was selected.")
+	Else
+;~ 		ConsoleWrite($FileOpenDialog & @CRLF)
+		GUICtrlSetData($Input, $FileOpenDialog)
+;~ 		ConsoleWrite(GUICtrlRead($Input) & @CRLF)
+	EndIf
+EndFunc
 
 
 
@@ -250,7 +288,7 @@ Func _WriteStringToXML($SearchText, $Input)
 	$InputSpecChar = StringRegExpReplace($InputSpecChar, "[.*?^${}()|[\]\\]", "\\$0")
 	$FileStrings[$linenumber - 1] = StringRegExpReplace($FileStrings[$linenumber - 1], "(?<=>).*?(?=<)" , $InputSpecChar)
  	_FileWriteFromArray($FilePath, $FileStrings)
-;~ 	ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
+	ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
 EndFunc
 
 
@@ -283,4 +321,6 @@ Func _WriteStringToXMLForCombo($SearchText, $Combo)
 	Local $FileStrings = FileReadToArray($FilePath)
 	$FileStrings[$linenumber - 1] = StringRegExpReplace($FileStrings[$linenumber - 1], "(?<=>).*?(?=<)" , GUICtrlRead($Combo))
 	_FileWriteFromArray($FilePath, $FileStrings)
+	ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
+
 EndFunc
