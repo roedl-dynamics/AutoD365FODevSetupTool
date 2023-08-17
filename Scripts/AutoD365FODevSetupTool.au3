@@ -1,3 +1,10 @@
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#AutoIt3Wrapper_Icon=zahnrad.ico
+#AutoIt3Wrapper_Res_Description=Change the parameters of D365 Configuration-XML
+#AutoIt3Wrapper_Res_Fileversion=1.0.0.1
+#AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
+#AutoIt3Wrapper_Res_CompanyName=Rödl Dynamics GmbH
+#EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 #cs ----------------------------------------------------------------------------
 
  AutoIt Version: 3.3.16.1
@@ -40,7 +47,6 @@
 
 
 Opt("MustDeclareVars", 1)
-#AutoIt3Wrapper_icon=zahnrad.ico
 
 
 #include <ButtonConstants.au3>
@@ -209,13 +215,10 @@ EndFunc
 Func _OpenFileDialog($Input)
 	Local $Path = GUICtrlRead($Input)
 	StringLeft($Path, StringInStr($Path, "\", 0, -1) - 1)
-	ConsoleWrite($Path & @CRLF)
+;~ 	ConsoleWrite($Path & @CRLF)
 	Local Const $message = "Choose the file"
 	Local $FileOpenDialog = FileOpenDialog($message, $Path, "Configuration file (*.config)|All (*.*)")
-	If @error Then
-		MsgBox($MB_SYSTEMMODAL, "", "No file was selected.")
-	Else
-;~ 		ConsoleWrite($FileOpenDialog & @CRLF)
+	If Not @error Then
 		GUICtrlSetData($Input, $FileOpenDialog)
 ;~ 		ConsoleWrite(GUICtrlRead($Input) & @CRLF)
 	EndIf
@@ -288,7 +291,7 @@ Func _WriteStringToXML($SearchText, $Input)
 	$InputSpecChar = StringRegExpReplace($InputSpecChar, "[.*?^${}()|[\]\\]", "\\$0")
 	$FileStrings[$linenumber - 1] = StringRegExpReplace($FileStrings[$linenumber - 1], "(?<=>).*?(?=<)" , $InputSpecChar)
  	_FileWriteFromArray($FilePath, $FileStrings)
-	ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
+;~ 	ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
 EndFunc
 
 
@@ -321,6 +324,6 @@ Func _WriteStringToXMLForCombo($SearchText, $Combo)
 	Local $FileStrings = FileReadToArray($FilePath)
 	$FileStrings[$linenumber - 1] = StringRegExpReplace($FileStrings[$linenumber - 1], "(?<=>).*?(?=<)" , GUICtrlRead($Combo))
 	_FileWriteFromArray($FilePath, $FileStrings)
-	ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
+;~ 	ConsoleWrite($FileStrings[$linenumber - 1] & @CRLF)
 
 EndFunc
